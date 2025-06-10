@@ -50,27 +50,8 @@ def resolve_activation(name):
 
 
 def build_run_path(config, config_path):
-    env = config["env"]
-    model = config["model"]
-
-    base = Path("runs")
-    reward = f"reward_{env['reward_type']}"
-    controller = f"controller_{env['controller']}"
-    obs = f"observation_{env['observation_type']}"
-    
-    domain_length = env["L"]
-    gamma = model["gamma"]
-    buffer = model["buffer_size"]
-    lim = env["lim"]
-
-    leaf = f"L_{domain_length}_gamma_{gamma}_buffer_{buffer}_lim_{lim}"
-
-    path = base / reward / controller / obs / leaf
+    path = Path("runs")
     path.mkdir(parents=True, exist_ok=True)
-
-    # Save config file for reproducibility
-    shutil.copy(config_path, path / Path(config_path).name)
-
     return path
 
 
@@ -87,14 +68,19 @@ class WandbEvalCallback(BaseCallback):
             terminated = [False]
             total_reward = 0
             steps = 0
+            total_norm = 0
             while not terminated[0]:
                 action, _ = self.model.predict(obs, deterministic=True)
                 obs, reward, terminated, truncated = self.eval_env.step(action)
+                u_norm = np.linalg.norm(self.eval_env.get_attr("u_current"))
+                total_norm += u_norm[0]
                 total_reward += reward[0]
                 steps += 1
             wandb.log({
                 "eval/mean_reward": total_reward/steps,
                 "eval/final_reward": reward[0],
+                "eval/mean_u_norm": total_norm/steps,
+                "eval/final_u_norm": u_norm[0],
                 "global_step": self.num_timesteps
             })
         return True
@@ -192,14 +178,15 @@ def main(config_path="config_sac.yaml"):
     
     # Save model whether completed or interrupted
     if config["train"].get("save_model", True):
-        suffix = "interrupted" if interrupted else "final"
-        save_path = save_dir / f"sac_ks_{suffix}.zip"
+        config_name = Path(config_path).stem.replace("config_", "")
+        save_path = Path("runs") / f"{config_name}.zip"
         model.save(str(save_path))
         wandb.save(str(save_path))
 
     if config["logger"].get("save_replay_buffer", False):
-        model.save_replay_buffer(str(save_dir / "sac_ks_replay_buffer.pkl"))
-        wandb.save(str(save_dir / "sac_ks_replay_buffer.pkl"))                                      
+        replay_path = Path("runs") / f"{config_name}_replay_buffer.pkl"
+        model.save_replay_buffer(str(replay_path))
+        wandb.save(str(replay_path))                                      
 
 if __name__ == "__main__":
     config_path = "config_sac.yaml"
