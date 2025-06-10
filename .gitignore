@@ -1,0 +1,38 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.so
+
+./
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS / Editor
+.DS_Store
+.vscode/
+
+# Python environment
+.venv/
+env/
+*/env/
+*.egg-info/
+*.env
+
+# Large binary or generated files
+*.npy
+*.npz
+*.pkl
+*.pt
+*.pth
+*.log
+*.zip
+*.ckpt
+
+# Specific folders to ignore
+wandb/
+logs/
+
+# Optionally ignore large outputs, but keep configs
+runs/**/sac_ks_replay_buffer.pkl
+runs/**/sac_ks_final.zip
