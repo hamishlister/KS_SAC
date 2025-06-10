@@ -12,7 +12,7 @@ env:
   plot: False               # Whether to plot the results
   verbose: True             # Verbosity of the output
   info_freq: 5000           # Frequency of printing information
-  controller: 'fully_linear'# Type of controller to use
+  controller: 'fully_linear' # Type of controller to use
   sees_state: True          # Whether the controller sees the full state
   observation_type: 'state' # Type of observation to use
   reward_type: 'trivial'    # Type of reward function to use
@@ -20,7 +20,7 @@ env:
   noise: 0.0                # Noise level for initial condition (if specified)
   initial_amp: 0.1          # Amplitude of the initial condition
   continuous: False         # Whether the environment is continuous or discrete
-  terminate_thresh:3.5      # When to reset environment
+  terminate_thresh: 3.5      # When to reset environment
 
 # model configuration
 model:
