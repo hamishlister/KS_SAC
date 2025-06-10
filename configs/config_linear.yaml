@@ -6,7 +6,7 @@ env:
   device: "cpu"             # Device to run the simulation on
   N: 32                     # Number of grid points
   dt: 0.01                  # Time step size  
-  max_steps: 5000           # Maximum number of steps per episode
+  max_steps: 2500           # Maximum number of steps per episode
   u0: null                  # Initial condition for the state
   lim: 1.0                  # Limit for the control input
   plot: False               # Whether to plot the results
@@ -20,6 +20,7 @@ env:
   noise: 0.0                # Noise level for initial condition (if specified)
   initial_amp: 0.1          # Amplitude of the initial condition
   continuous: False         # Whether the environment is continuous or discrete
+  terminate_thresh:3.5      # When to reset environment
 
 # model configuration
 model:
