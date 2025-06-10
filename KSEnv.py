@@ -37,6 +37,7 @@ class KS_Env(gym.Env):
             noise = 1.0,
             initial_amp = 0.01,
             continuous=False,
+            terminate_thresh=25.0,
     ):
         self.L = L                                                  # Length of the domain
         self.N = N                                                  # Number of grid points
@@ -63,6 +64,7 @@ class KS_Env(gym.Env):
         self.noise = np.float32(noise)                                          # Amplitude of Gaussian noise on initial condition
         self.initial_amp = np.float32(initial_amp)                              # Initial amplitude for the random initial condition
         self.continuous = continuous                                # Whether the environment is continuous or not
+        self.terminate_thresh = np.float32(terminate_thresh)                  # Threshold for termination
 
         if self.seed is not None:
             self.seed = int(seed)
@@ -253,7 +255,7 @@ class KS_Env(gym.Env):
 
         self.u_current_hat, self.u_x, self.u_nonlin, self.u_t = self.compute_quantities(self.u_current)
 
-        if np.linalg.norm(self.u_current) > 25:
+        if np.linalg.norm(self.u_current) > self.terminate_thresh:
             
             reward = -1e10
             terminated = True
