@@ -80,7 +80,7 @@ class WandbEvalCallback(BaseCallback):
                 "eval/mean_reward": total_reward/steps,
                 "eval/final_reward": reward[0],
                 "eval/mean_u_norm": total_norm/steps,
-                "eval/final_u_norm": u_norm[0],
+                "eval/final_u_norm": u_norm,
                 "global_step": self.num_timesteps
             })
         return True
