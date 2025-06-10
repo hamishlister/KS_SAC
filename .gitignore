@@ -26,13 +26,8 @@ env/
 *.pt
 *.pth
 *.log
-*.zip
 *.ckpt
 
 # Specific folders to ignore
 wandb/
 logs/
-
-# Optionally ignore large outputs, but keep configs
-runs/**/sac_ks_replay_buffer.pkl
-runs/**/sac_ks_final.zip
