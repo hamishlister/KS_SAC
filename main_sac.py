@@ -9,4 +9,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     from SAC import main
-    main(config_path=args.config, ens_idx=args.ensemble_index)
+    main(config_path=args.config, ens_idx=args.ensemble_index-1)
