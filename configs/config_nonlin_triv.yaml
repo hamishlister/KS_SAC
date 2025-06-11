@@ -60,7 +60,7 @@ logger:
   eval_iter: 2  # Evaluate every x time steps
   num_eval_envs: 5
   num_train_envs: 5
-  project_name: Test_run
+  project_name: Trivial_reward
   team_name: s2030435-university-of-edinburgh
   save_replay_buffer: False
   
