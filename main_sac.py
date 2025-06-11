@@ -2,7 +2,11 @@ if __name__ == "__main__":
     import multiprocessing as mp
     mp.set_start_method("spawn", force=True)
 
-    import sys
-    config_path = sys.argv[1] if len(sys.argv) > 1 else "configs/config_sac.yaml"
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("config", type=str, nargs="?", default="configs/config_sac.yaml")
+    parser.add_argument("--ensemble_index", type=int, default=0)
+    args = parser.parse_args()
+
     from SAC import main
-    main(config_path)
+    main(config_path=args.config, ens_idx=args.ensemble_index)

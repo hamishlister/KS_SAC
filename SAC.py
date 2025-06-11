@@ -8,6 +8,7 @@ import importlib
 from pathlib import Path
 import shutil
 import multiprocessing
+import argparse
 
 from stable_baselines3 import SAC
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
@@ -81,12 +82,12 @@ class WandbEvalCallback(BaseCallback):
         return True
     
 
-def main(config_path="config_sac.yaml"):
+def main(config_path="config_sac.yaml", ens_idx=0):
     # Load YAML
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-    exp_name = str(config_path).split("/")[-1].replace("config_", "").replace(".yaml", "")
+    exp_name = f"{str(config_path).split('/')[-1].replace('config_', '').replace('.yaml', '')}_ens{ens_idx}"
 
     # Init Weights & Biases
     wandb.init(
@@ -124,6 +125,8 @@ def main(config_path="config_sac.yaml"):
         else:
             policy_kwargs["net_arch"] = {"pi": [], "qf": [256, 256]}  # default qf fallback if needed
 
+    ens_seed = cast_scalar(config["env"].get("seed", None)) + ens_idx
+
     model = SAC(
         policy=POLICY_LOOKUP[config["model"]["policy"]],
         env=env,
@@ -140,7 +143,7 @@ def main(config_path="config_sac.yaml"):
         policy_kwargs=policy_kwargs,
         verbose=config["model"].get("verbose", 1),
         tensorboard_log=config["model"].get("tensorboard_log", None),
-        seed=cast_scalar(config["model"].get("seed", None)),
+        seed=ens_seed,
         device=torch.device("mps" if torch.backends.mps.is_available() else "cpu")
     )
 

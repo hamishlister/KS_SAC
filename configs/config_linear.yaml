@@ -1,25 +1,25 @@
 # environment and task
 env:
-  L: 7                      # Domain length  
-  actuator_loss_weight: 1   # Weight for actuator loss
-  seed: null                # Random seed for reproducibility
-  device: "cpu"             # Device to run the simulation on
-  N: 32                     # Number of grid points
-  dt: 0.01                  # Time step size  
-  max_steps: 2500           # Maximum number of steps per episode
-  u0: null                  # Initial condition for the state
-  lim: 1.0                  # Limit for the control input
-  plot: False               # Whether to plot the results
-  verbose: True             # Verbosity of the output
-  info_freq: 5000           # Frequency of printing information
+  L: 7                       # Domain length  
+  actuator_loss_weight: 1    # Weight for actuator loss
+  seed: null                 # Random seed for reproducibility
+  device: "cpu"              # Device to run the simulation on
+  N: 32                      # Number of grid points
+  dt: 0.01                   # Time step size  
+  max_steps: 2500            # Maximum number of steps per episode
+  u0: null                   # Initial condition for the state
+  lim: 1.0                   # Limit for the control input
+  plot: False                # Whether to plot the results
+  verbose: True              # Verbosity of the output
+  info_freq: 5000            # Frequency of printing information
   controller: 'fully_linear' # Type of controller to use
-  sees_state: True          # Whether the controller sees the full state
-  observation_type: 'state' # Type of observation to use
-  reward_type: 'trivial'    # Type of reward function to use
-  pullback_state: True      # Whether to use pullback state
-  noise: 0.0                # Noise level for initial condition (if specified)
-  initial_amp: 0.1          # Amplitude of the initial condition
-  continuous: False         # Whether the environment is continuous or discrete
+  sees_state: True           # Whether the controller sees the full state
+  observation_type: 'state'  # Type of observation to use
+  reward_type: 'trivial'     # Type of reward function to use
+  pullback_state: True       # Whether to use pullback state
+  noise: 0.0                 # Noise level for initial condition (if specified)
+  initial_amp: 0.1           # Amplitude of the initial condition
+  continuous: False          # Whether the environment is continuous or discrete
   terminate_thresh: 3.5      # When to reset environment
 
 # model configuration
@@ -53,6 +53,7 @@ train:
   total_timesteps: 10000000    # Total number of timesteps for training
   save_model: True             # Whether to save the model after training
   load_model: False            # Whether to load a pre-trained model
+  num_models: 4                # Number of models to train
 
 
 # logging

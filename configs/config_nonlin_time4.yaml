@@ -43,8 +43,8 @@ model:
   use_sde_at_warmup: False    # Whether to use SDE during warmup
   policy_kwargs:              # Additional keyword arguments for the policy
     net_arch:                 # Network architecture
-      pi: [256, 256, 256]          # Architecture of the policy network
-      qf: [256, 256, 256]          # Architecture of the Q-function network
+      pi: [256, 256, 256]     # Architecture of the policy network
+      qf: [256, 256, 256]     # Architecture of the Q-function network
     activation_fn: 'nn.ReLU'  # Activation function to use in the network
 
 # training configuration
@@ -52,6 +52,7 @@ train:
   total_timesteps: 10000000    # Total number of timesteps for training
   save_model: True             # Whether to save the model after training
   load_model: False            # Whether to load a pre-trained model
+  num_models: 4                # Number of models to train
 
 
 # logging

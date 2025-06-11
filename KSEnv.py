@@ -264,23 +264,24 @@ class KS_Env(gym.Env):
 
             self.average_rewards.append(np.mean(self.episode_rewards, dtype=np.float32))
             self.final_rewards.append(np.mean(self.episode_rewards[-100:], dtype=np.float32))
-            clear_output(wait=True)
-            fig, ax = plt.subplots(1, 2, figsize=(12, 6))
-            ax[0].imshow(
-                    self.trajectory,
-                    cmap = 'jet',
-                    aspect = 'auto',
-                    origin = 'lower',
-                    extent = [-self.L/2, self.L/2, 0, self.trajectory.shape[0]*self.dt],
-                    vmin = -3,
-                    vmax = 3
-                )
-            ax[0].set_title('Exploding solution, environment reset')
-            ax[1].plot(self.episode_rewards[100:-100])
-            ax[1].set_title('Episode rewards')
-            ax[1].set_xlabel('Step')
-            ax[1].set_ylabel('Reward')
-            plt.show()
+            if self.plot:
+                clear_output(wait=True)
+                fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+                ax[0].imshow(
+                        self.trajectory,
+                        cmap = 'jet',
+                        aspect = 'auto',
+                        origin = 'lower',
+                        extent = [-self.L/2, self.L/2, 0, self.trajectory.shape[0]*self.dt],
+                        vmin = -3,
+                        vmax = 3
+                    )
+                ax[0].set_title('Exploding solution, environment reset')
+                ax[1].plot(self.episode_rewards[100:-100])
+                ax[1].set_title('Episode rewards')
+                ax[1].set_xlabel('Step')
+                ax[1].set_ylabel('Reward')
+                plt.show()
         
             reward = -1e10
 
