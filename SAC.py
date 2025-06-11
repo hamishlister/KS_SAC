@@ -164,13 +164,12 @@ def main(config_path="config_sac.yaml", ens_idx=0):
     
     # Save model whether completed or interrupted
     if config["train"].get("save_model", True):
-        config_name = Path(config_path).stem.replace("config_", "")
-        save_path = Path("runs") / f"{config_name}.zip"
+        save_path = Path("runs") / f"{exp_name}.zip"
         model.save(str(save_path))
         wandb.save(str(save_path))
 
     if config["logger"].get("save_replay_buffer", False):
-        replay_path = Path("runs") / f"{config_name}_replay_buffer.pkl"
+        replay_path = Path("runs") / f"{exp_name}_replay_buffer.pkl"
         model.save_replay_buffer(str(replay_path))
         wandb.save(str(replay_path))                                      
 
