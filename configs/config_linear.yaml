@@ -2,7 +2,7 @@
 env:
   L: 7                       # Domain length  
   actuator_loss_weight: 1    # Weight for actuator loss
-  seed: null                 # Random seed for reproducibility
+  seed: 1                    # Random seed for reproducibility
   device: "cpu"              # Device to run the simulation on
   N: 32                      # Number of grid points
   dt: 0.01                   # Time step size  

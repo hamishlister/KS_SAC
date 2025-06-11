@@ -125,7 +125,9 @@ def main(config_path="config_sac.yaml", ens_idx=0):
         else:
             policy_kwargs["net_arch"] = {"pi": [], "qf": [256, 256]}  # default qf fallback if needed
 
-    ens_seed = cast_scalar(config["env"].get("seed", None)) + ens_idx
+    ens_seed = cast_scalar(config["env"].get("seed", None))
+    if ens_seed is not None:
+        ens_seed += ens_idx  # Ensure unique seed for each ensemble member
 
     model = SAC(
         policy=POLICY_LOOKUP[config["model"]["policy"]],

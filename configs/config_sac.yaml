@@ -2,7 +2,7 @@
 env:
   L: 8                      # Domain length  
   actuator_loss_weight: 1   # Weight for actuator loss
-  seed: null                # Random seed for reproducibility
+  seed: 1                   # Random seed for reproducibility
   device: "cpu"             # Device to run the simulation on
   N: 32                     # Number of grid points
   dt: 0.01                  # Time step size  
@@ -37,7 +37,7 @@ model:
   ent_coef: 'auto'            # Entropy coefficient for exploration
   target_update_interval: 1   # Interval for updating the target network
   verbose: 1                  # Verbosity level for the model
-  seed: null                  # Random seed for the model
+  seed: 1                     # Random seed for the model
   tensorboard_log: "./logs/"  # Directory for TensorBoard logs
   use_sde: False              # Whether to use State-Dependent Exploration
   use_sde_at_warmup: False    # Whether to use SDE during warmup
