@@ -25,10 +25,15 @@ POLICY_LOOKUP = {
 }
 
 
-def make_env(env_config):
+def make_env(env_config, seed=None):
     def _init():
         try:
-            env = KS_Env(**env_config)
+            # Copy and override the seed safely
+            local_env_config = dict(env_config)  # shallow copy
+            if seed is not None:
+                local_env_config["seed"] = seed
+
+            env = KS_Env(**local_env_config)
             return env
         except Exception as e:
             print(f"[Worker crash] Could not create env: {e}")
