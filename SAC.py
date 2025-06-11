@@ -73,7 +73,7 @@ class WandbEvalCallback(BaseCallback):
                 action, _ = self.model.predict(obs, deterministic=True)
                 obs, reward, terminated, truncated = self.eval_env.step(action)
                 u_norm = np.linalg.norm(self.eval_env.get_attr("u_current"))
-                total_norm += u_norm[0]
+                total_norm += u_norm
                 total_reward += reward[0]
                 steps += 1
             wandb.log({
