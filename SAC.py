@@ -49,11 +49,6 @@ def resolve_activation(name):
     return name  # If it's already a class or something else valid
 
 
-def build_run_path(config, config_path):
-    path = Path("runs")
-    path.mkdir(parents=True, exist_ok=True)
-    return path
-
 
 class WandbEvalCallback(BaseCallback):
     def __init__(self, eval_env, eval_freq=1000, verbose=0):
@@ -91,24 +86,12 @@ def main(config_path="config_sac.yaml"):
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-    save_dir = build_run_path(config, config_path)
-    
-    env_args = config["env"]
-    model_args = config["model"]
-    reward = f"reward_{env_args['reward_type']}"
-    controller = f"controller_{env_args['controller']}"
-    obs = f"observation_{env_args['observation_type']}"
-    
-    domain_length = env_args["L"]
-    gamma = model_args["gamma"]
-    buffer = str(int(int(model_args["buffer_size"])/1000))
-    lim = env_args["lim"]
-
+    exp_name = str(config_path).split("/")[-1].replace("config_", "").replace(".yaml", "")
 
     # Init Weights & Biases
     wandb.init(
         project=config["logger"]["project_name"],
-        name=f"{reward}_{controller}_{obs}_L_{domain_length}_gamma_{gamma}_buf_{buffer}k_lim_{lim}",
+        name=exp_name,
         config=config,
         mode=config["logger"].get("mode", "online"),
         group=config["logger"].get("team_name", None)
