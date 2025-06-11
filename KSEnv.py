@@ -169,8 +169,10 @@ class KS_Env(gym.Env):
             self.u_prev = self.u_current.copy()
         else:
             # Generate a random initial condition in Fourier space
-            rand_fourier_coef = (np.random.normal(0, 1, self.N//2 +1)).astype(np_float) * self.initial_amp
+            rand_fourier_coef = (np.random.normal(0, 1, self.N//2 +1)).astype(np_float)
             self.u_prev = (np.fft.irfft(rand_fourier_coef)).astype(np_float)
+            self.u_prev = (self.u_prev - np.mean(self.u_prev) * np.ones(self.N, dtype=np_float)).astype(np_float)
+            self.u_prev = (self.initial_amp * self.u_prev/np.linalg.norm(self.u_prev)).astype(np_float)
         
 
         self.linear_operator = self.wavenumbers**2 - self.wavenumbers**4
