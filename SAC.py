@@ -66,11 +66,11 @@ class WandbEvalCallback(BaseCallback):
         if self.n_calls % self.eval_freq == 0 and self.n_calls > 0:
             print(f"Evaluating at step {self.num_timesteps}...")
             obs = self.eval_env.reset()
-            terminated = [False]*self.eval_env.num_envs
+            terminated_once = [False] * self.eval_env.num_envs
             total_reward = np.zeros(self.eval_env.num_envs)
             steps = 0
             total_norm = np.zeros(self.eval_env.num_envs)
-            while not all(terminated):
+            while not all(terminated_once):
                 action, _ = self.model.predict(obs, deterministic=True)
                 obs, rewards, terminated, truncated = self.eval_env.step(action)
                 rewards_mean = rewards.mean()
@@ -78,6 +78,7 @@ class WandbEvalCallback(BaseCallback):
                 u_norm_mean = np.array([np.linalg.norm(u) for u in u_values]).mean()
                 total_norm += u_norm_mean
                 total_reward += rewards_mean
+                terminated_once = [t or prev for t, prev in zip(terminated, terminated_once)]
                 steps += 1
             wandb.log({
                 "eval/mean_reward": total_reward/steps,
