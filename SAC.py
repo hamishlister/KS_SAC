@@ -86,9 +86,9 @@ class WandbEvalCallback(BaseCallback):
                 terminated_once = [t or prev for t, prev in zip(terminated, terminated_once)]
                 steps += 1
             wandb.log({
-                "eval/mean_reward": total_reward/steps,
+                "eval/mean_reward": (total_reward / steps).mean().item(),
                 "eval/final_reward": rewards_mean,
-                "eval/mean_u_norm": total_norm/steps,
+                "eval/mean_u_norm": (total_norm / steps).mean().item(),
                 "eval/final_u_norm": u_norm_mean,
                 "global_step": self.num_timesteps,
                 "eval/steps": steps
