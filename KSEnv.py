@@ -231,7 +231,13 @@ class KS_Env(gym.Env):
     
     def compute_reward(self):
         if self.reward_type == 'time':
-            divisor = np.linalg.norm(self.u_current) if np.linalg.norm(self.u_current) != 0 else 1e-8
+            norm = np.linalg.norm(self.u_current)
+            if norm > 1:
+                divisor = 1
+            elif norm < 1e-6:
+                divisor = 1e-6
+            else:
+                divisor = norm
             return (- (np.linalg.norm(self.u_t)/divisor + self.actuator_loss_weight * np.linalg.norm(self.forcing, ord=2))).astype(np_float)
         elif self.reward_type == 'trivial':
             return (- (np.linalg.norm(self.u_current) + self.actuator_loss_weight * np.linalg.norm(self.forcing, ord=2))).astype(np_float)
