@@ -226,14 +226,15 @@ class KS_Env(gym.Env):
 
         if self.pullback_state:
             forcing = self.shift(forcing, -self.alpha)
-            
+
         return forcing.astype(np_float)
     
     def compute_reward(self):
         if self.reward_type == 'time':
-            return (- (np.linalg.norm(self.u_t) + self.actuator_loss_weight * np.linalg.norm(self.forcing, ord=2))**2).astype(np_float)
+            divisor = np.linalg.norm(self.u_current) if np.linalg.norm(self.u_current) != 0 else 1e-8
+            return (- (np.linalg.norm(self.u_t)/divisor + self.actuator_loss_weight * np.linalg.norm(self.forcing, ord=2))).astype(np_float)
         elif self.reward_type == 'trivial':
-            return (- (np.linalg.norm(self.u_current) + self.actuator_loss_weight * np.linalg.norm(self.forcing, ord=2))**2).astype(np_float)
+            return (- (np.linalg.norm(self.u_current) + self.actuator_loss_weight * np.linalg.norm(self.forcing, ord=2))).astype(np_float)
         else:
             raise ValueError("Invalid reward type. Choose 'time' or 'trivial'.")
 
