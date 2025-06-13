@@ -56,6 +56,58 @@ def resolve_activation(name):
 
 
 
+# class WandbEvalCallback(BaseCallback):
+#     def __init__(self, eval_env, eval_freq=1000, verbose=0):
+#         super().__init__(verbose)
+#         self.eval_env = eval_env
+#         self.eval_freq = eval_freq
+
+#     def _on_step(self) -> bool:
+#         if self.n_calls % self.eval_freq == 0 and self.n_calls > 0:
+#             print(f"Evaluating at step {self.num_timesteps}...")
+#             obs = self.eval_env.reset()
+#             terminated_once = [False] * self.eval_env.num_envs
+#             total_reward = np.zeros(self.eval_env.num_envs)
+#             steps = 0
+#             total_norm = np.zeros(self.eval_env.num_envs)
+#             total_action = np.zeros(self.eval_env.num_envs)
+#             total_time = np.zeros(self.eval_env.num_envs)
+#             while not all(terminated_once):
+#                 action, _ = self.model.predict(obs, deterministic=True)
+#                 obs, rewards, terminated, truncated = self.eval_env.step(action)
+#                 mask = np.logical_not(np.array(terminated_once))
+#                 if np.any(mask):
+#                     rewards_mean = rewards[mask].mean()
+#                     u_values = self.eval_env.get_attr("u_current")
+#                     t_values = self.eval_env.get_attr("u_t")
+#                     u_norm_mean = np.array([np.linalg.norm(u) for u in u_values])[mask].mean()
+#                     action_mean = np.array([np.linalg.norm(a) for a in action])[mask].mean()
+#                     t_mean = np.array([np.linalg.norm(t) for t in t_values])[mask].mean()
+#                 else:
+#                     rewards_mean = 0.0
+#                     u_norm_mean = 0.0
+#                     action_mean = 0.0
+#                     t_mean = 0.0
+#                 total_norm += u_norm_mean
+#                 total_reward += rewards_mean
+#                 total_action += action_mean
+#                 total_time += t_mean
+#                 terminated_once = [t or prev for t, prev in zip(terminated, terminated_once)]
+#                 steps += 1
+#             wandb.log({
+#                 "eval/mean_reward": (total_reward / steps).mean().item(),
+#                 "eval/final_reward": rewards_mean,
+#                 "eval/mean_u_norm": (total_norm / steps).mean().item(),
+#                 "eval/final_u_norm": u_norm_mean,
+#                 "eval/mean_action_norm": (total_action / steps).mean().item(),
+#                 "eval/final_action_norm": action_mean,
+#                 "eval/mean_time_derivative": (total_time / steps).mean().item(),
+#                 "eval/final_time_derivative": t_mean,
+#                 "global_step": self.num_timesteps,
+#                 "eval/steps": steps
+#             })
+#         return True
+
 class WandbEvalCallback(BaseCallback):
     def __init__(self, eval_env, eval_freq=1000, verbose=0):
         super().__init__(verbose)
@@ -66,42 +118,38 @@ class WandbEvalCallback(BaseCallback):
         if self.n_calls % self.eval_freq == 0 and self.n_calls > 0:
             print(f"Evaluating at step {self.num_timesteps}...")
             obs = self.eval_env.reset()
-            terminated_once = [False] * self.eval_env.num_envs
-            total_reward = np.zeros(self.eval_env.num_envs)
+            total_reward = 0.0
             steps = 0
-            total_norm = np.zeros(self.eval_env.num_envs)
-            total_action = np.zeros(self.eval_env.num_envs)
-            total_time = np.zeros(self.eval_env.num_envs)
-            while not all(terminated_once):
+            total_norm = 0.0
+            total_action = 0.0
+            total_time = 0.0
+
+            terminated = [False] * self.eval_env.num_envs
+            while not any(terminated):
                 action, _ = self.model.predict(obs, deterministic=True)
                 obs, rewards, terminated, truncated = self.eval_env.step(action)
-                mask = np.logical_not(np.array(terminated_once))
-                if np.any(mask):
-                    rewards_mean = rewards[mask].mean()
-                    u_values = self.eval_env.get_attr("u_current")
-                    t_values = self.eval_env.get_attr("u_t")
-                    u_norm_mean = np.array([np.linalg.norm(u) for u in u_values])[mask].mean()
-                    action_mean = np.array([np.linalg.norm(a) for a in action])[mask].mean()
-                    t_mean = np.array([np.linalg.norm(t) for t in t_values])[mask].mean()
-                else:
-                    rewards_mean = 0.0
-                    u_norm_mean = 0.0
-                    action_mean = 0.0
-                    t_mean = 0.0
+
+                rewards_mean = rewards.mean()
+                u_values = self.eval_env.get_attr("u_current")
+                t_values = self.eval_env.get_attr("u_t")
+                u_norm_mean = np.mean([np.linalg.norm(u) for u in u_values])
+                action_mean = np.mean([np.linalg.norm(a) for a in action])
+                t_mean = np.mean([np.linalg.norm(t) for t in t_values])
+
                 total_norm += u_norm_mean
                 total_reward += rewards_mean
                 total_action += action_mean
                 total_time += t_mean
-                terminated_once = [t or prev for t, prev in zip(terminated, terminated_once)]
                 steps += 1
+
             wandb.log({
-                "eval/mean_reward": (total_reward / steps).mean().item(),
+                "eval/mean_reward": (total_reward / steps),
                 "eval/final_reward": rewards_mean,
-                "eval/mean_u_norm": (total_norm / steps).mean().item(),
+                "eval/mean_u_norm": (total_norm / steps),
                 "eval/final_u_norm": u_norm_mean,
-                "eval/mean_action_norm": (total_action / steps).mean().item(),
+                "eval/mean_action_norm": (total_action / steps),
                 "eval/final_action_norm": action_mean,
-                "eval/mean_time_derivative": (total_time / steps).mean().item(),
+                "eval/mean_time_derivative": (total_time / steps),
                 "eval/final_time_derivative": t_mean,
                 "global_step": self.num_timesteps,
                 "eval/steps": steps
