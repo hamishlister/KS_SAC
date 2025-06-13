@@ -136,7 +136,7 @@ class WandbEvalCallback(BaseCallback):
                 obs, rewards, terminated, truncated = self.eval_env.step(action)
 
                 r_mean = rewards.mean()
-                a_norms = self.eval_env.get_attr("action_norm")
+                a_norms = self.eval_env.get_attr("forcing_norm")
                 u_norms = self.eval_env.get_attr("u_current_norm")
                 t_norms = self.eval_env.get_attr("u_t_norm")
                 u_mean = np.mean(u_norms)
