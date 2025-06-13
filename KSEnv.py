@@ -206,7 +206,7 @@ class KS_Env(gym.Env):
 
     def compute_forcing(self, action):
         if self.controller == 'unforced':
-            return np.zeros(self.N, dtype=np_float)
+            forcing =  np.zeros(self.N, dtype=np_float)
         
         elif self.controller == 'linear':
             # Compute the linear forcing matrix K
@@ -214,7 +214,7 @@ class KS_Env(gym.Env):
             for i in range(self.N):
                 row = np.roll(action, i, axis=0)
                 K[i, :] = row
-            return (K @ self.u_current).astype(np_float)
+            forcing =  (K @ self.u_current).astype(np_float)
 
             # self.unsquashed = np.arctanh(np.clip(action, -1 + 1e-6, 1 - 1e-6))
 
@@ -222,7 +222,12 @@ class KS_Env(gym.Env):
         
         else:
             # Compute the nonlinear forcing term
-            return action - np.mean(action, dtype=np_float) * np.ones(self.N, dtype=np_float)
+            forcing =  action - np.mean(action, dtype=np_float) * np.ones(self.N, dtype=np_float)
+
+        if self.pullback_state:
+            forcing = self.shift(forcing, -self.alpha)
+            
+        return forcing.astype(np_float)
     
     def compute_reward(self):
         if self.reward_type == 'time':
