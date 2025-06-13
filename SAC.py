@@ -71,6 +71,7 @@ class WandbEvalCallback(BaseCallback):
             steps = 0
             total_norm = np.zeros(self.eval_env.num_envs)
             total_action = np.zeros(self.eval_env.num_envs)
+            total_time = np.zeros(self.eval_env.num_envs)
             while not all(terminated_once):
                 action, _ = self.model.predict(obs, deterministic=True)
                 obs, rewards, terminated, truncated = self.eval_env.step(action)
@@ -78,15 +79,19 @@ class WandbEvalCallback(BaseCallback):
                 if np.any(mask):
                     rewards_mean = rewards[mask].mean()
                     u_values = self.eval_env.get_attr("u_current")
+                    t_values = self.eval_env.get_attr("u_t")
                     u_norm_mean = np.array([np.linalg.norm(u) for u in u_values])[mask].mean()
                     action_mean = np.array([np.linalg.norm(a) for a in action])[mask].mean()
+                    t_mean = np.array([np.linalg.norm(t) for t in t_values])[mask].mean()
                 else:
                     rewards_mean = 0.0
                     u_norm_mean = 0.0
                     action_mean = 0.0
+                    t_mean = 0.0
                 total_norm += u_norm_mean
                 total_reward += rewards_mean
                 total_action += action_mean
+                total_time += t_mean
                 terminated_once = [t or prev for t, prev in zip(terminated, terminated_once)]
                 steps += 1
             wandb.log({
@@ -96,6 +101,8 @@ class WandbEvalCallback(BaseCallback):
                 "eval/final_u_norm": u_norm_mean,
                 "eval/mean_action_norm": (total_action / steps).mean().item(),
                 "eval/final_action_norm": action_mean,
+                "eval/mean_time_derivative": (total_time / steps).mean().item(),
+                "eval/final_time_derivative": t_mean,
                 "global_step": self.num_timesteps,
                 "eval/steps": steps
             })
