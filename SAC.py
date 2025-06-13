@@ -125,6 +125,12 @@ class WandbEvalCallback(BaseCallback):
             total_time = 0.0
 
             terminated = [False] * self.eval_env.num_envs
+
+            u_prev = 0.0
+            action_prev = 0.0
+            t_prev = 0.0
+            reward_prev = 0.0
+
             while not any(terminated):
                 action, _ = self.model.predict(obs, deterministic=True)
                 obs, rewards, terminated, truncated = self.eval_env.step(action)
@@ -142,15 +148,20 @@ class WandbEvalCallback(BaseCallback):
                 total_time += t_mean
                 steps += 1
 
+                u_prev = u_norm_mean
+                action_prev = action_mean
+                t_prev = t_mean
+                reward_prev = rewards_mean
+
             wandb.log({
                 "eval/mean_reward": (total_reward / steps),
-                "eval/final_reward": rewards_mean,
+                "eval/final_reward": reward_prev,
                 "eval/mean_u_norm": (total_norm / steps),
-                "eval/final_u_norm": u_norm_mean,
+                "eval/final_u_norm": u_prev,
                 "eval/mean_action_norm": (total_action / steps),
-                "eval/final_action_norm": action_mean,
+                "eval/final_action_norm": action_prev,
                 "eval/mean_time_derivative": (total_time / steps),
-                "eval/final_time_derivative": t_mean,
+                "eval/final_time_derivative": t_prev,
                 "global_step": self.num_timesteps,
                 "eval/steps": steps
             })
