@@ -127,42 +127,43 @@ class WandbEvalCallback(BaseCallback):
             terminated = [False] * self.eval_env.num_envs
 
             u_prev = 0.0
-            action_prev = 0.0
+            a_prev = 0.0
             t_prev = 0.0
-            reward_prev = 0.0
+            r_prev = 0.0
 
             while not any(terminated):
                 action, _ = self.model.predict(obs, deterministic=True)
                 obs, rewards, terminated, truncated = self.eval_env.step(action)
 
-                rewards_mean = rewards.mean()
-                u_values = self.eval_env.get_attr("u_current")
-                t_values = self.eval_env.get_attr("u_t")
-                u_norm_mean = np.mean([np.linalg.norm(u) for u in u_values])
-                action_mean = np.mean([np.linalg.norm(a) for a in action])
-                t_mean = np.mean([np.linalg.norm(t) for t in t_values])
+                r_mean = rewards.mean()
+                a_norms = self.eval_env.get_attr("action_norm")
+                u_norms = self.eval_env.get_attr("u_current_norm")
+                t_norms = self.eval_env.get_attr("u_t_norm")
+                u_mean = np.mean(u_norms)
+                a_mean = np.mean(a_norms)
+                t_mean = np.mean(t_norms)
 
-                total_norm += u_norm_mean
-                total_reward += rewards_mean
-                total_action += action_mean
+                total_norm += u_mean
+                total_reward += r_mean
+                total_action += a_mean
                 total_time += t_mean
                 steps += 1
 
-                u_prev = u_norm_mean
-                action_prev = action_mean
+                u_prev = u_mean
+                a_prev = a_mean
                 t_prev = t_mean
-                reward_prev = rewards_mean
-                final_true_reward = - t_prev/u_prev - action_prev
+                r_prev = r_mean
+                final_true_reward = - t_prev/u_prev - a_prev
 
             wandb.log({
                 "eval/mean_reward": (total_reward / steps),
-                "eval/final_reward": reward_prev,
+                "eval/final_reward": r_mean,
                 "eval/mean_u_norm": (total_norm / steps),
-                "eval/final_u_norm": u_prev,
+                "eval/final_u_norm": u_mean,
                 "eval/mean_action_norm": (total_action / steps),
-                "eval/final_action_norm": action_prev,
+                "eval/final_action_norm": a_mean,
                 "eval/mean_time_derivative": (total_time / steps),
-                "eval/final_time_derivative": t_prev,
+                "eval/final_time_derivative": t_mean,
                 "eval/final_true_reward": final_true_reward,
                 "global_step": self.num_timesteps,
                 "eval/steps": steps

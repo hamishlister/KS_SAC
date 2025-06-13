@@ -267,6 +267,10 @@ class KS_Env(gym.Env):
         self.u_prev_nonlin = self.u_nonlin.copy()
         self.u_current = (np.fft.irfft(self.u_next_hat)).astype(np_float)
 
+        self.u_current_norm = np.linalg.norm(self.u_current)
+        self.u_t_norm = np.linalg.norm(self.u_t)
+        self.forcing_norm = np.linalg.norm(self.forcing)
+
         self.u_current_hat, self.u_x, self.u_nonlin, self.u_t = self.compute_quantities(self.u_current)
 
         if np.linalg.norm(self.u_current) > self.terminate_thresh:
