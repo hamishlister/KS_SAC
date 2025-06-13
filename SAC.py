@@ -210,7 +210,7 @@ def main(config_path="config_sac.yaml", ens_idx=0):
         make_env(config["env"], seed=ens_seed * 1000 + 500 + i)
         for i in range(config["logger"]["num_eval_envs"])
     ]
-    eval_env = SubprocVecEnv(eval_env_fns)
+    eval_env = DummyVecEnv(eval_env_fns)
 
     # Build model
     policy_kwargs = config["model"].get("policy_kwargs", {})
