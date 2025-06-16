@@ -20,7 +20,6 @@ env/
 *.env
 
 # Large binary or generated files
-*.npy
 *.npz
 *.pkl
 *.pt
