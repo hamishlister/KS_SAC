@@ -11,7 +11,7 @@ env:
   lim: 1.0                            # Limit for the control input
   plot: False                         # Whether to plot the results
   verbose: True                       # Verbosity of the output
-  info_freq: 5000                     # Frequency of printing information
+  info_freq: 1000                     # Frequency of printing information
   controller: 'nonlin'                # Type of controller to use
   sees_state: True                    # Whether the controller sees the full state
   observation_type: 'state_plus_time' # Type of observation to use
