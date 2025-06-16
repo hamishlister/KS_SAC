@@ -468,6 +468,81 @@ Action: {np.linalg.norm(self.forcing):.4f}
         
         return self.eval_rewards, self.trajectory, self.u_t_list, self.action_list
 
+    def evaluate_ens_model(self, models, num_episodes=1, compare=False):
+        """
+        Evaluates the model on the environment for a given number of episodes.
+        """
+        self.eval_trajectory = []
+        self.eval_u_t_list = []
+        self.eval_action_list = []
+        self.eval_rewards = []
+        self.newton_distance = []
+
+        for episode in range(num_episodes):
+            obs, _ = self.reset()
+            done = False
+            
+            episode_reward = []
+            episode_trajectory = []
+            episode_u_t_list = []
+            episode_action_list = []
+            
+            while not done:
+                actions = []
+                for model in models:
+                    action, _ = model.predict(obs, deterministic=True)
+                    actions.append(action)
+                action = np.mean(actions, axis=0)  # Average the actions from all models
+                obs, reward, terminated, truncated, _ = self.step(action)
+                
+                episode_trajectory.append(obs[0])
+                episode_u_t_list.append(obs[1])
+                episode_action_list.append(action)
+                episode_reward.append(reward)
+                
+                done = terminated or truncated
+                
+
+            # if self.reward_type == 'time':
+            #     # run newton search to find difference between the final state and the target state
+            #     final_state = episode_trajectory[-1]
+            #     converged_state = newton_search(final_state, self.wavenumbers)
+            #     distance = np.linalg.norm(final_state - converged_state)
+            #     self.newton_distance.append(distance)
+
+
+            
+            self.eval_rewards.append(episode_reward)
+            self.eval_trajectory.append(np.array(episode_trajectory))
+            self.eval_u_t_list.append(np.array(episode_u_t_list))
+            self.eval_action_list.append(np.array(episode_action_list))
+
+        if compare:
+
+            unforced_trajectory = []
+            unforced_u_t_list = []
+            unforced_rewards = []
+
+            for episode in range(num_episodes):    
+                obs, _ = self.reset()
+                done = False
+                
+                episode_reward = []
+                
+                while not done:
+                    action1 = np.zeros_like(action)
+                    obs, reward, terminated, truncated, _ = self.step(action1)
+                    
+                    episode_reward.append(reward)
+                    done = terminated or truncated
+
+                unforced_rewards.append(episode_reward)
+            unforced_reward_mean = np.mean(np.mean(np.asarray(unforced_rewards, dtype=object), axis=0))
+
+            print(f"Unforced rewards: {unforced_reward_mean}")
+            print(f"Forced rewards: {np.mean(np.mean(self.eval_rewards, axis=0))}")
+        
+        return self.eval_rewards, self.eval_trajectory, self.eval_u_t_list, self.eval_action_list
 
 
 
