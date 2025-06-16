@@ -30,3 +30,5 @@ env/
 # Specific folders to ignore
 wandb/
 logs/
+
+trained_model_testing.ipynb
