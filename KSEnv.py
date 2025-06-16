@@ -350,7 +350,7 @@ Action: {np.linalg.norm(self.forcing):.4f}
                 ax[1].set_title('Episode rewards')
                 ax[1].set_xlabel('Step')
                 ax[1].set_ylabel('Reward')
-                ax[1].set_ylim(min(self.episode_rewards), 0)
+                ax[1].set_ylim(min(self.episode_rewards[100:]), 0)
                 plt.show()
 
         obs = self.return_observation()
@@ -511,8 +511,8 @@ Action: {np.linalg.norm(self.forcing):.4f}
             #     self.newton_distance.append(distance)
 
 
-            
-            self.eval_rewards.append(episode_reward)
+            if self.current_step > 99:
+                self.eval_rewards.append(episode_reward)
             self.eval_trajectory.append(np.array(episode_trajectory))
             self.eval_u_t_list.append(np.array(episode_u_t_list))
             self.eval_action_list.append(np.array(episode_action_list))
@@ -536,6 +536,7 @@ Action: {np.linalg.norm(self.forcing):.4f}
                     episode_reward.append(reward)
                     done = terminated or truncated
 
+            if self.current_step > 99:
                 unforced_rewards.append(episode_reward)
             unforced_reward_mean = np.mean(np.mean(np.asarray(unforced_rewards, dtype=object), axis=0))
 
