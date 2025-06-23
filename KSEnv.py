@@ -109,7 +109,7 @@ class KS_Env(gym.Env):
         Shifts a vector u by alpha
         '''
         u_hat = (np.fft.rfft(u)).astype(np_complex)
-        shift = (np.exp(1j * self.wavenumbers * alpha)).astype(np_float)
+        shift = (np.exp(1j * self.wavenumbers * alpha)).astype(np_complex)
         u_shifted = (np.fft.irfft(u_hat * shift)).astype(np_float)
         return u_shifted
 
@@ -260,9 +260,9 @@ class KS_Env(gym.Env):
         self.u_nonlin_hat = self.u_nonlin_hat * self.dealiasing_mask
         self.forcing_hat = self.forcing_hat * self.dealiasing_mask
 
-        self.nonlin_total = self.u_nonlin_hat + self.forcing_hat
+        self.nonlin_hat_total = self.u_nonlin_hat + self.forcing_hat
         
-        self.u_next_hat = (((1 + 0.5 * self.linear_operator * self.dt) * self.u_current_hat + self.dt * self.nonlin_total) / (1 - 0.5 * self.dt * self.linear_operator)).astype(np_complex)
+        self.u_next_hat = (((1 + 0.5 * self.linear_operator * self.dt) * self.u_current_hat + self.dt * self.nonlin_hat_total) / (1 - 0.5 * self.dt * self.linear_operator)).astype(np_complex)
 
         self.u_prev_nonlin = self.u_nonlin.copy()
         self.u_current = (np.fft.irfft(self.u_next_hat)).astype(np_float)
