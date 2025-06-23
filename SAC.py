@@ -152,7 +152,6 @@ class WandbEvalCallback(BaseCallback):
                 u_prev = u_mean
                 a_prev = a_mean
                 t_prev = t_mean
-                r_prev = r_mean
                 final_true_reward = - t_prev/u_prev - a_prev
 
             wandb.log({
@@ -274,3 +273,56 @@ def main(config_path="config_sac.yaml", ens_idx=0):
 if __name__ == "__main__":
     config_path = "configs/config_nonlin_time.yaml"
     main(config_path)
+
+  
+#     # Early stopping variables
+#     low_eval_counter = 0
+#     reward_threshold = -10  # Set your threshold
+#     max_low_evals = 2
+
+#     # Custom training loop for early stopping
+#     total_timesteps = config["train"]["total_timesteps"]
+#     callback = WandbEvalCallback(eval_env, eval_freq=eval_step_freq)
+#     timesteps = 0
+#     interrupted = False
+#     while timesteps < total_timesteps:
+#         try:
+#             # Determine how many steps to run until next eval or end
+#             steps_to_run = min(eval_step_freq, total_timesteps - timesteps)
+#             model.learn(
+#                 total_timesteps=timesteps + steps_to_run,
+#                 reset_num_timesteps=False,
+#                 callback=callback
+#             )
+#             timesteps += steps_to_run
+#         except KeyboardInterrupt:
+#             print("\nTraining interrupted by user. Saving model...")
+#             interrupted = True
+#             break
+
+#         # Get the latest Wandb logs
+#         logs = wandb.run.history._data[-1] if hasattr(wandb.run, "history") and wandb.run.history._data else {}
+#         # Early stopping logic
+#         if "mean_eval/mean_reward" in logs:
+#             if logs["mean_eval/mean_reward"] > reward_threshold:
+#                 low_eval_counter += 1
+#                 if low_eval_counter >= max_low_evals:
+#                     print(f"Early stopping: {max_low_evals} evaluations below threshold")
+#                     break  # Exit the training loop
+#             else:
+#                 low_eval_counter = 0
+    
+#     # Save model whether completed or interrupted
+#     if config["train"].get("save_model", True):
+#         save_path = Path("runs") / f"{exp_name}.zip"
+#         model.save(str(save_path))
+#         wandb.save(str(save_path))
+
+#     if config["logger"].get("save_replay_buffer", False):
+#         replay_path = Path("runs") / f"{exp_name}_replay_buffer.pkl"
+#         model.save_replay_buffer(str(replay_path))
+#         wandb.save(str(replay_path))
+
+# if __name__ == "__main__":
+#     config_path = "configs/config_nonlin_time.yaml"
+#     main(config_path)
