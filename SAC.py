@@ -156,17 +156,17 @@ class WandbEvalCallback(BaseCallback):
                 final_true_reward = - t_prev/u_prev - a_prev
 
             wandb.log({
-                "eval/mean_reward": (total_reward / steps),
-                "eval/final_reward": r_mean,
-                "eval/mean_u_norm": (total_norm / steps),
-                "eval/final_u_norm": u_mean,
-                "eval/mean_action_norm": (total_action / steps),
-                "eval/final_action_norm": a_mean,
-                "eval/mean_time_derivative": (total_time / steps),
-                "eval/final_time_derivative": t_mean,
-                "eval/final_true_reward": final_true_reward,
+                "mean_eval/mean_reward": (total_reward / steps),
+                "final_eval/final_reward": r_mean,
+                "mean_eval/mean_u_norm": (total_norm / steps),
+                "final_eval/final_u_norm": u_mean,
+                "mean_eval/mean_action_norm": (total_action / steps),
+                "final_eval/final_action_norm": a_mean,
+                "mean_eval/mean_time_derivative": (total_time / steps),
+                "final_eval/final_time_derivative": t_mean,
+                "final_eval/final_true_reward": final_true_reward,
                 "global_step": self.num_timesteps,
-                "eval/steps": steps
+                "mean_eval/steps": steps
             })
         return True
     
