@@ -50,7 +50,7 @@ model:
 
 # training configuration
 train:
-  total_timesteps: 10000000    # Total number of timesteps for training
+  total_timesteps: 4000000    # Total number of timesteps for training
   save_model: True             # Whether to save the model after training
   load_model: False            # Whether to load a pre-trained model
   num_models: 4                # Number of models to train
