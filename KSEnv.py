@@ -222,7 +222,7 @@ class KS_Env(gym.Env):
         
         else:
             # Compute the nonlinear forcing term
-            forcing =  action - np.mean(action, dtype=np_float) * np.ones(self.N, dtype=np_float)
+            forcing =  action.astype(np_float)
 
         if self.pullback_state:
             forcing = self.shift(forcing, -self.alpha)

@@ -13,7 +13,7 @@ import argparse
 from stable_baselines3 import SAC
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 from stable_baselines3.common.callbacks import BaseCallback
-from policies import LinearSACPolicy
+from policies import LinearSACPolicy, SACPolicy
 
 from KSEnv import KS_Env
 
@@ -21,6 +21,7 @@ torch.set_default_dtype(torch.float32)
 
 POLICY_LOOKUP = {
     "MlpPolicy": "MlpPolicy",
+    "SACPolicy": SACPolicy,
     "LinearSACPolicy": LinearSACPolicy
 }
 

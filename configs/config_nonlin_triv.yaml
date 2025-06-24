@@ -24,7 +24,7 @@ env:
 
 # model configuration
 model:
-  policy: 'MlpPolicy'   # Type of policy to use
+  policy: 'SACPolicy'   # Type of policy to use
   env: 'env'                  # Environment to use for the policy
   learning_rate: 0.0003       # Learning rate for the policy
   buffer_size: 200000         # Size of the replay buffer
