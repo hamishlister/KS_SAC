@@ -31,4 +31,4 @@ env/
 wandb/
 logs/
 
-trained_model_testing.ipynb
+trained_models_testing.ipynb
