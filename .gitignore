@@ -26,6 +26,8 @@ env/
 *.pth
 *.log
 *.ckpt
+*.out
+*.err
 
 # Specific folders to ignore
 wandb/
