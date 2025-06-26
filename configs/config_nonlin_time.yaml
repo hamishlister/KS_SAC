@@ -1,7 +1,7 @@
 # environment and task
 env:
   L: 11.6                   # Domain length  
-  actuator_loss_weight: 1   # Weight for actuator loss
+  actuator_loss_weight: 0   # Weight for actuator loss
   seed: 1                   # Random seed for reproducibility
   device: "mps"             # Device to run the simulation on
   N: 32                     # Number of grid points
