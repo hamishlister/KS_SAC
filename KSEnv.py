@@ -305,9 +305,6 @@ class KS_Env(gym.Env):
 
         else:
             terminated = self.current_step >= self.max_steps
-
-        
-        if np.linalg.norm(self.u_current) <= 100:
             
             reward = self.compute_reward()
 
@@ -539,9 +536,10 @@ Action: {np.linalg.norm(self.forcing):.4f}
             if self.current_step > 99:
                 unforced_rewards.append(episode_reward)
             unforced_reward_mean = np.mean(np.mean(np.asarray(unforced_rewards, dtype=object), axis=0))
+            unforced_reward_std = np.std(np.mean(np.asarray(unforced_rewards, dtype=object), axis=0))
 
-            print(f"Unforced rewards: {unforced_reward_mean}")
-            print(f"Forced rewards: {np.mean(np.mean(self.eval_rewards, axis=0))}")
+            print(f"Unforced rewards: {unforced_reward_mean} ± {unforced_reward_std}")
+            print(f"Forced rewards: {np.mean(np.mean(self.eval_rewards, axis=0))} ± {np.std(np.mean(self.eval_rewards, axis=0))}")
         
         return self.eval_rewards, self.eval_trajectory, self.eval_u_t_list, self.eval_action_list
 
