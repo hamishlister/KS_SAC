@@ -46,7 +46,7 @@ model:
     net_arch:                 # Network architecture
       pi: [256, 256]          # Architecture of the policy network
       qf: [256, 256]          # Architecture of the Q-function network
-    activation_fn: 'nn.ReLU'  # Activation function to use in the network
+    activation_fn: 'nn.GELU'  # Activation function to use in the network
 
 # training configuration
 train:
