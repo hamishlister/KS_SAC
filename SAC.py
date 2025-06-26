@@ -13,7 +13,8 @@ import argparse
 from stable_baselines3 import SAC
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 from stable_baselines3.common.callbacks import BaseCallback
-from policies import LinearSACPolicy, SACPolicy
+from policies import LinearSACPolicy, MySACPolicy
+from callbacks import WandbEvalCallback
 
 from KSEnv import KS_Env
 
@@ -21,7 +22,7 @@ torch.set_default_dtype(torch.float32)
 
 POLICY_LOOKUP = {
     "MlpPolicy": "MlpPolicy",
-    "SACPolicy": SACPolicy,
+    "SACPolicy": MySACPolicy,
     "LinearSACPolicy": LinearSACPolicy
 }
 
@@ -55,121 +56,6 @@ def resolve_activation(name):
         return getattr(nn, name.split(".")[1])
     return name  # If it's already a class or something else valid
 
-
-
-# class WandbEvalCallback(BaseCallback):
-#     def __init__(self, eval_env, eval_freq=1000, verbose=0):
-#         super().__init__(verbose)
-#         self.eval_env = eval_env
-#         self.eval_freq = eval_freq
-
-#     def _on_step(self) -> bool:
-#         if self.n_calls % self.eval_freq == 0 and self.n_calls > 0:
-#             print(f"Evaluating at step {self.num_timesteps}...")
-#             obs = self.eval_env.reset()
-#             terminated_once = [False] * self.eval_env.num_envs
-#             total_reward = np.zeros(self.eval_env.num_envs)
-#             steps = 0
-#             total_norm = np.zeros(self.eval_env.num_envs)
-#             total_action = np.zeros(self.eval_env.num_envs)
-#             total_time = np.zeros(self.eval_env.num_envs)
-#             while not all(terminated_once):
-#                 action, _ = self.model.predict(obs, deterministic=True)
-#                 obs, rewards, terminated, truncated = self.eval_env.step(action)
-#                 mask = np.logical_not(np.array(terminated_once))
-#                 if np.any(mask):
-#                     rewards_mean = rewards[mask].mean()
-#                     u_values = self.eval_env.get_attr("u_current")
-#                     t_values = self.eval_env.get_attr("u_t")
-#                     u_norm_mean = np.array([np.linalg.norm(u) for u in u_values])[mask].mean()
-#                     action_mean = np.array([np.linalg.norm(a) for a in action])[mask].mean()
-#                     t_mean = np.array([np.linalg.norm(t) for t in t_values])[mask].mean()
-#                 else:
-#                     rewards_mean = 0.0
-#                     u_norm_mean = 0.0
-#                     action_mean = 0.0
-#                     t_mean = 0.0
-#                 total_norm += u_norm_mean
-#                 total_reward += rewards_mean
-#                 total_action += action_mean
-#                 total_time += t_mean
-#                 terminated_once = [t or prev for t, prev in zip(terminated, terminated_once)]
-#                 steps += 1
-#             wandb.log({
-#                 "eval/mean_reward": (total_reward / steps).mean().item(),
-#                 "eval/final_reward": rewards_mean,
-#                 "eval/mean_u_norm": (total_norm / steps).mean().item(),
-#                 "eval/final_u_norm": u_norm_mean,
-#                 "eval/mean_action_norm": (total_action / steps).mean().item(),
-#                 "eval/final_action_norm": action_mean,
-#                 "eval/mean_time_derivative": (total_time / steps).mean().item(),
-#                 "eval/final_time_derivative": t_mean,
-#                 "global_step": self.num_timesteps,
-#                 "eval/steps": steps
-#             })
-#         return True
-
-class WandbEvalCallback(BaseCallback):
-    def __init__(self, eval_env, eval_freq=1000, verbose=0):
-        super().__init__(verbose)
-        self.eval_env = eval_env
-        self.eval_freq = eval_freq
-
-    def _on_step(self) -> bool:
-        if self.n_calls % self.eval_freq == 0 and self.n_calls > 0:
-            print(f"Evaluating at step {self.num_timesteps}...")
-            obs = self.eval_env.reset()
-            total_reward = 0.0
-            steps = 0
-            total_norm = 0.0
-            total_action = 0.0
-            total_time = 0.0
-
-            terminated = [False] * self.eval_env.num_envs
-
-            u_prev = 0.0
-            a_prev = 0.0
-            t_prev = 0.0
-            r_prev = 0.0
-
-            while not any(terminated):
-                action, _ = self.model.predict(obs, deterministic=True)
-                obs, rewards, terminated, truncated = self.eval_env.step(action)
-
-                r_mean = rewards.mean()
-                a_norms = self.eval_env.get_attr("forcing_norm")
-                u_norms = self.eval_env.get_attr("u_current_norm")
-                t_norms = self.eval_env.get_attr("u_t_norm")
-                u_mean = np.mean(u_norms)
-                a_mean = np.mean(a_norms)
-                t_mean = np.mean(t_norms)
-
-                total_norm += u_mean
-                total_reward += r_mean
-                total_action += a_mean
-                total_time += t_mean
-                steps += 1
-
-                u_prev = u_mean
-                a_prev = a_mean
-                t_prev = t_mean
-                final_true_reward = - t_prev/u_prev - a_prev
-
-            wandb.log({
-                "mean_eval/mean_reward": (total_reward / steps),
-                "final_eval/final_reward": r_mean,
-                "mean_eval/mean_u_norm": (total_norm / steps),
-                "final_eval/final_u_norm": u_mean,
-                "mean_eval/mean_action_norm": (total_action / steps),
-                "final_eval/final_action_norm": a_mean,
-                "mean_eval/mean_time_derivative": (total_time / steps),
-                "final_eval/final_time_derivative": t_mean,
-                "final_eval/final_true_reward": final_true_reward,
-                "global_step": self.num_timesteps,
-                "mean_eval/steps": steps
-            })
-        return True
-    
 
 def main(config_path="config_sac.yaml", ens_idx=0):
     # Load YAML
@@ -215,6 +101,7 @@ def main(config_path="config_sac.yaml", ens_idx=0):
 
     # Build model
     policy_kwargs = config["model"].get("policy_kwargs", {})
+    print(f"Using policy: {config['model']['policy']} with kwargs: {policy_kwargs}")
     if "activation_fn" in policy_kwargs:
         policy_kwargs["activation_fn"] = resolve_activation(policy_kwargs["activation_fn"])
 
@@ -244,6 +131,9 @@ def main(config_path="config_sac.yaml", ens_idx=0):
         seed=ens_seed,
         device=torch.device("mps" if torch.backends.mps.is_available() else "cpu")
     )
+
+    print("Model structure:")
+    print(model.policy)
 
     eval_step_freq = config["logger"]["eval_iter"] * config["env"]["max_steps"]
     print(f"Evaluation every {eval_step_freq} steps.")

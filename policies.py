@@ -536,7 +536,7 @@ class NonlinActor(BasePolicy):
         return self(observation, deterministic)
 
 
-class SACPolicy(BasePolicy):
+class MySACPolicy(BasePolicy):
     """
     Policy class (with both actor and critic) for SAC.
 
