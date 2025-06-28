@@ -38,33 +38,35 @@ class KS_Env(gym.Env):
             initial_amp = 0.01,
             continuous=False,
             terminate_thresh=25.0,
+            reward_weight = 0.0,
     ):
-        self.L = L                                                  # Length of the domain
-        self.N = N                                                  # Number of grid points
-        self.dt = np.float32(dt)                                                # Time step
-        self.x = np.linspace(-L/2, L/2, N, endpoint=False, dtype=np_float)          # Spatial grid
-        self.wavenumbers = (np.fft.rfftfreq(N, d=L/N) * 2 * np.pi).astype(np.float32)    # Wavenumbers
-        self.num_sensors = int(N)                                   # Number of sensors
-        self.seed = seed                                            # Random seed
-        self.device = device                                        # Device to use (CPU or GPU)
-        self.max_steps = max_steps                                  # Maximum number of steps
-        self.actuator_loss_weight = np.float32(actuator_loss_weight)            # Actuator loss weight
-        self.trajectory = []                                        # Trajectory of the solution
-        self.u_t_list = []                                          # List of time derivatives
-        self.lim = lim                                              # Limitation for the action space
-        self.plot = plot                                            # Whether to plot the trajectory or not
-        self.verbose = verbose                                      # Whether to print rewards every 100 steps or not
-        self.info_freq = info_freq                                  # Frequency of printing information
-        self.controller = controller                                # Controller type (linear or nonlinear)
-        self.sees_state = sees_state                                # Whether the agent sees the state or not
-        self.observation_type = observation_type                    # Observation type (state or time derivative)
-        self.reward_type = reward_type                              # Reward type (time or trivial)
-        self.pullback_state = pullback_state                        # Whether to use pullback or not
-        self.u0 = u0                                                # Initial condition
-        self.noise = np.float32(noise)                                          # Amplitude of Gaussian noise on initial condition
-        self.initial_amp = np.float32(initial_amp)                              # Initial amplitude for the random initial condition
-        self.continuous = continuous                                # Whether the environment is continuous or not
-        self.terminate_thresh = np.float32(terminate_thresh)                  # Threshold for termination
+        self.L = L                                                                      # Length of the domain
+        self.N = N                                                                      # Number of grid points
+        self.dt = np.float32(dt)                                                        # Time step
+        self.x = np.linspace(-L/2, L/2, N, endpoint=False, dtype=np_float)              # Spatial grid
+        self.wavenumbers = (np.fft.rfftfreq(N, d=L/N) * 2 * np.pi).astype(np.float32)   # Wavenumbers
+        self.num_sensors = int(N)                                                       # Number of sensors
+        self.seed = seed                                                                # Random seed
+        self.device = device                                                            # Device to use (CPU or GPU)
+        self.max_steps = max_steps                                                      # Maximum number of steps
+        self.actuator_loss_weight = np.float32(actuator_loss_weight)                    # Actuator loss weight
+        self.trajectory = []                                                            # Trajectory of the solution
+        self.u_t_list = []                                                              # List of time derivatives
+        self.lim = lim                                                                  # Limitation for the action space
+        self.plot = plot                                                                # Whether to plot the trajectory or not
+        self.verbose = verbose                                                          # Whether to print rewards every 100 steps or not
+        self.info_freq = info_freq                                                      # Frequency of printing information
+        self.controller = controller                                                    # Controller type (linear or nonlinear)
+        self.sees_state = sees_state                                                    # Whether the agent sees the state or not
+        self.observation_type = observation_type                                        # Observation type (state or time derivative)
+        self.reward_type = reward_type                                                  # Reward type (time or trivial)
+        self.pullback_state = pullback_state                                            # Whether to use pullback or not
+        self.u0 = u0                                                                    # Initial condition
+        self.noise = np.float32(noise)                                                  # Amplitude of Gaussian noise on initial condition
+        self.initial_amp = np.float32(initial_amp)                                      # Initial amplitude for the random initial condition
+        self.continuous = continuous                                                    # Whether the environment is continuous or not
+        self.terminate_thresh = np.float32(terminate_thresh)                            # Threshold for termination
+        self.reward_weight = np.float32(reward_weight)                                  # Weight for the reward
 
         if self.seed is not None:
             self.seed = int(seed)
@@ -196,6 +198,20 @@ class KS_Env(gym.Env):
         self.u_t_list = [self.u_t.copy()]
         self.action_list = []
         
+        if self.reward_type == 'time':
+            norm = np.linalg.norm(self.u_current)
+            if norm > 1:
+                divisor = 1
+            elif norm < 1e-6:
+                divisor = 1e-6
+            else:
+                divisor = norm
+            self.prev_reward = (- (np.linalg.norm(self.u_t)/divisor)).astype(np_float)
+        elif self.reward_type == 'trivial':
+            self.prev_reward (- (np.linalg.norm(self.u_current))).astype(np_float)
+        else:
+            raise ValueError("Invalid reward type. Choose 'time' or 'trivial'.")
+        
         self.episode_rewards = []
 
 
@@ -306,7 +322,10 @@ class KS_Env(gym.Env):
         else:
             terminated = self.current_step >= self.max_steps
             
-            reward = self.compute_reward()
+            new_reward = self.compute_reward()
+            diff_reward = ((new_reward - self.prev_reward)/(new_reward + self.prev_reward)).astype(np_float)
+            reward = self.reward_weight * diff_reward + (1 - self.reward_weight) * new_reward
+            self.prev_reward = new_reward
 
             self.episode_rewards.append(reward)
 

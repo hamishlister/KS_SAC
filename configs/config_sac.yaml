@@ -1,29 +1,31 @@
 # environment and task
 env:
-  L: 8                      # Domain length  
-  actuator_loss_weight: 1   # Weight for actuator loss
-  seed: 1                   # Random seed for reproducibility
-  device: "cpu"             # Device to run the simulation on
-  N: 32                     # Number of grid points
-  dt: 0.01                  # Time step size  
-  max_steps: 5000           # Maximum number of steps per episode
-  u0: null                  # Initial condition for the state
-  lim: 1.0                  # Limit for the control input
-  plot: False               # Whether to plot the results
-  verbose: True             # Verbosity of the output
-  info_freq: 5000           # Frequency of printing information
-  controller: 'nonlin'      # Type of controller to use
-  sees_state: True          # Whether the controller sees the full state
-  observation_type: 'state' # Type of observation to use
-  reward_type: 'trivial'    # Type of reward function to use
-  pullback_state: True      # Whether to use pullback state
-  noise: 0.0                # Noise level for initial condition (if specified)
-  initial_amp: 0.1          # Amplitude of the initial condition
-  continuous: False         # Whether the environment is continuous or discrete
+  L: 11.6                     # Domain length  
+  actuator_loss_weight: 0     # Weight for actuator loss
+  seed: 1                     # Random seed for reproducibility
+  device: "mps"               # Device to run the simulation on
+  N: 32                       # Number of grid points
+  dt: 0.01                    # Time step size  
+  max_steps: 5000             # Maximum number of steps per episode
+  u0: null                    # Initial condition for the state
+  lim: 1.0                    # Limit for the control input
+  plot: False                 # Whether to plot the results
+  verbose: True               # Verbosity of the output
+  info_freq: 5000             # Frequency of printing information
+  controller: 'nonlin'        # Type of controller to use
+  sees_state: True            # Whether the controller sees the full state
+  observation_type: 'state'   # Type of observation to use
+  reward_type: 'time'         # Type of reward function to use
+  pullback_state: True        # Whether to use pullback state
+  noise: 0.0                  # Noise level for initial condition (if specified)
+  initial_amp: 0.1            # Amplitude of the initial condition
+  continuous: False           # Whether the environment is continuous or discrete
+  terminate_thresh: 5.        # Threshold for termination condition
+  reward_weight: 0.9          # Weight for the reward function
 
 # model configuration
 model:
-  policy: 'MlpPolicy'   # Type of policy to use
+  policy: 'SACPolicy'         # Type of policy to use
   env: 'env'                  # Environment to use for the policy
   learning_rate: 0.0003       # Learning rate for the policy
   buffer_size: 200000         # Size of the replay buffer
@@ -49,16 +51,15 @@ model:
 
 # training configuration
 train:
-  total_timesteps: 1000000     # Total number of timesteps for training
-  save_model: True             # Whether to save the model after training
-  load_model: False            # Whether to load a pre-trained model
-  num_models: 4                # Number of models to train
+  total_timesteps: 1000000    # Total number of timesteps for training
+  save_model: True            # Whether to save the model after training
+  load_model: False           # Whether to load a pre-trained model
 
 
 # logging
 logger:
   mode: online
-  eval_iter: 2  # Evaluate every x time steps
+  eval_iter: 2                # Evaluate every x episodes
   num_eval_envs: 5
   num_train_envs: 5
   project_name: Test_run

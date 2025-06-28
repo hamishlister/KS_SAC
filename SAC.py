@@ -162,7 +162,7 @@ def main(config_path="config_sac.yaml", ens_idx=0):
         wandb.save(str(replay_path))                                      
 
 if __name__ == "__main__":
-    config_path = "configs/config_nonlin_time.yaml"
+    config_path = "configs/config_sac.yaml"
     main(config_path)
 
   
