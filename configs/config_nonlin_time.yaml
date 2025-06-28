@@ -1,6 +1,6 @@
 # environment and task
 env:
-  L: 11.6                   # Domain length  
+  L: 22.21                   # Domain length  
   actuator_loss_weight: 0   # Weight for actuator loss
   seed: 1                   # Random seed for reproducibility
   device: "mps"             # Device to run the simulation on
@@ -18,7 +18,7 @@ env:
   reward_type: 'time'       # Type of reward function to use
   pullback_state: True      # Whether to use pullback state
   noise: 0.0                # Noise level for initial condition (if specified)
-  initial_amp: 0.1          # Amplitude of the initial condition
+  initial_amp: 1.0          # Amplitude of the initial condition
   continuous: False         # Whether the environment is continuous or discrete
 
 # model configuration
@@ -28,7 +28,7 @@ model:
   learning_rate: 0.0003       # Learning rate for the policy
   buffer_size: 200000         # Size of the replay buffer
   learning_starts: 50000      # Steps before learning starts
-  batch_size: 256             # Batch size for training
+  batch_size: 512             # Batch size for training
   tau: 0.005                  # Soft update coefficient
   gamma: 0.99                 # Discount factor for future rewards
   train_freq: 1               # Frequency of training updates
