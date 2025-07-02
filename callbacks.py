@@ -50,7 +50,13 @@ class WandbEvalCallback(BaseCallback):
                 t_prev = t_mean
                 final_true_reward = - t_prev/u_prev - a_prev
 
-            wandb.log({
+            if hasattr(self.model, "log_ent_coef"):
+                alpha = self.model.log_ent_coef.exp().item()
+            else:
+                alpha = None  # can't find it
+                
+
+            log_data = {
                 "mean_eval/mean_reward": (total_reward / steps),
                 "final_eval/final_reward": r_mean,
                 "mean_eval/mean_u_norm": (total_norm / steps),
@@ -62,5 +68,8 @@ class WandbEvalCallback(BaseCallback):
                 "final_eval/final_true_reward": final_true_reward,
                 "global_step": self.num_timesteps,
                 "mean_eval/steps": steps
-            })
+            }
+            if alpha is not None:
+                log_data["mean_eval/alpha"] = alpha
+            wandb.log(log_data)
         return True
