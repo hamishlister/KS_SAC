@@ -208,7 +208,7 @@ class KS_Env(gym.Env):
                 divisor = norm
             self.prev_reward = (- (np.linalg.norm(self.u_t)/divisor)).astype(np_float)
         elif self.reward_type == 'trivial':
-            self.prev_reward (- (np.linalg.norm(self.u_current))).astype(np_float)
+            self.prev_reward = (- (np.linalg.norm(self.u_current))).astype(np_float)
         else:
             raise ValueError("Invalid reward type. Choose 'time' or 'trivial'.")
         
@@ -559,8 +559,10 @@ Action: {np.linalg.norm(self.forcing):.4f}
 
             print(f"Unforced rewards: {unforced_reward_mean} ± {unforced_reward_std}")
             print(f"Forced rewards: {np.mean(np.mean(self.eval_rewards, axis=0))} ± {np.std(np.mean(self.eval_rewards, axis=0))}")
+
+            reward_ratio = np.mean(np.mean(self.eval_rewards, axis=0)) / unforced_reward_mean
         
-        return self.eval_rewards, self.eval_trajectory, self.eval_u_t_list, self.eval_action_list
+        return self.eval_rewards, self.eval_trajectory, self.eval_u_t_list, self.eval_action_list, reward_ratio if compare else None
 
 
 
